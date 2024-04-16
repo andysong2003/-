@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日晷交互</title>
+
+    <style>
+        body {
+            background-image: url('./img/bk.jpg');
+            /* 使用rgba来设置透明度 */
+            background-size: 100% auto;
+            /* 图片宽度与网页相同，高度自适应 */
+            background-size: cover;
+            /* 图片将填充整个屏幕 */
+            background-repeat: no-repeat;
+            /* 防止图片重复 */
+            background-attachment: fixed;
+            /* 固定背景图片，不随滚动而移动 */
+            /* 可以添加其他样式来设置背景的其他属性，比如颜色、透明度等 */
+
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #container {
+            width: 70%;
+            height: 80%;
+            overflow: hidden;
+            border: 5px outset rgba(194, 194, 161, 0.986);
+        }
+    </style>
+
+
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+
+
+    <input type="checkbox" id="check">
+    <label for="check">
+        <i class="fas fa-bars" id="btn"><img src="https://img.icons8.com/office/30/undefined/menu--v1.png" alt="" /></i>
+        <i class="fas fa-times" id="cancel"><img src="https://img.icons8.com/office/16/undefined/delete-sign.png"
+                alt="" /></i>
+    </label>
+
+    <div class="sidebar">
+        <header>myapp</header>
+        <ul>
+            <li>
+                <a href="index.html">
+                    <img src="https://img.icons8.com/cotton/20/undefined/home--v3.png" alt="" />
+                    <i>首页</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="实体模型.html">
+                    <img src="https://img.icons8.com/stickers/20/undefined/photo-album.png" alt="" />
+                    <i>实体模型</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="#">
+                    <img src="https://img.icons8.com/fluency/20/undefined/spiral-bound-booklet.png" alt="" />
+                    <i>分解视图</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="日晷交互.html">
+                    <img src="https://img.icons8.com/ultraviolet/20/undefined/speech-bubble-with-dots.png" alt="" />
+                    <i>日晷交互</i>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <section></section>
+
+    <div id="container"></div>
+    <script type="module">
+        import * as THREE from './three.js/build/three.module.js';
+        import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from './three.js/examples/jsm/loaders/GLTFLoader.js';
+        let camera, scene, renderer;
+        init();
+        render();
+        function init() {
+            const container = document.getElementById('container');
+            camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.05, 10);
+            camera.position.set(0, 1, 0);
+
+
+            scene = new THREE.Scene();
+            // 创建光源
+            const light = new THREE.PointLight(0xffffff, 1, 10);
+            light.position.set(0, 1, 0);
+            light.castShadow = true; // 启用阴影
+            scene.add(light);
+            // 设置场景
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0xffffff);
+            container.appendChild(renderer.domElement);
+            // 创建地板
+            const floorGeometry = new THREE.PlaneGeometry(100, 100);
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeeee }); // 地板颜色
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2; // 使地板水平放置
+            floor.position.y = -0.5
+            floor.receiveShadow = true; // 启用阴影
+            scene.add(floor);
+
+            const p1 = new THREE.Vector3(0, -0.48, 0); // 第一个点的坐标
+            const p2 = new THREE.Vector3(1, -0.48, 1); // 第二个点的坐标
+            // 创建直线的几何体
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+            // 创建直线的材质
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 }); // 设置颜色和线宽
+            // 创建直线对象
+            const line = new THREE.Line(lineGeometry, lineMaterial);
+            // 将直线添加到场景中
+            scene.add(line);
+    
+
+
+
+
+            
+            // 加载模型
+            const loader = new GLTFLoader().setPath('./model/');
+            loader.load('02.gltf', function (gltf) {
+                gltf.scene.scale.set(0.3, 0.3, 0.3);
+                gltf.scene.position.y = -0.5;
+                scene.add(gltf.scene);
+                render();
+            });
+            // 添加控制器
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.addEventListener('change', render);
+            controls.minDistance = 0.1;
+            controls.maxDistance = 3;
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+        function render() {
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            const container = document.getElementById('container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            render();
+        }
+
+    </script>
+
+</body>
+
+</html>

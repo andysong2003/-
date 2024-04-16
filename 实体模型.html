@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实体模型</title>
+
+    <style>
+        body {
+            background-image: url('./img/bk.jpg');
+            /* 使用rgba来设置透明度 */
+            background-size: 100% auto;
+            /* 图片宽度与网页相同，高度自适应 */
+            background-size: cover;
+            /* 图片将填充整个屏幕 */
+            background-repeat: no-repeat;
+            /* 防止图片重复 */
+            background-attachment: fixed;
+            /* 固定背景图片，不随滚动而移动 */
+            /* 可以添加其他样式来设置背景的其他属性，比如颜色、透明度等 */
+
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        #container {
+            width: 70%;
+            height: 80%;
+            overflow: hidden;
+            border: 5px outset rgba(194, 194, 161, 0.986);
+        }
+    </style>
+
+
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+
+<body>
+
+
+    <input type="checkbox" id="check">
+    <label for="check">
+        <i class="fas fa-bars" id="btn"><img src="https://img.icons8.com/office/30/undefined/menu--v1.png" alt="" /></i>
+        <i class="fas fa-times" id="cancel"><img src="https://img.icons8.com/office/16/undefined/delete-sign.png"
+                alt="" /></i>
+    </label>
+
+    <div class="sidebar">
+        <header>myapp</header>
+        <ul>
+            <li>
+                <a href="index.html">
+                    <img src="https://img.icons8.com/cotton/20/undefined/home--v3.png" alt="" />
+                    <i>首页</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="实体模型.html">
+                    <img src="https://img.icons8.com/stickers/20/undefined/photo-album.png" alt="" />
+                    <i>实体模型</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="#">
+                    <img src="https://img.icons8.com/fluency/20/undefined/spiral-bound-booklet.png" alt="" />
+                    <i>分解视图</i>
+                </a>
+            </li>
+        </ul>
+        <ul>
+            <li>
+                <a href="日晷交互.html">
+                    <img src="https://img.icons8.com/ultraviolet/20/undefined/speech-bubble-with-dots.png" alt="" />
+                    <i>日晷交互</i>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <section></section>
+
+    <div id="container"></div>
+    <script type="module">
+        import * as THREE from './three.js/build/three.module.js';
+        import { OrbitControls } from './three.js/examples/jsm/controls/OrbitControls.js';
+        import { GLTFLoader } from './three.js/examples/jsm/loaders/GLTFLoader.js';
+        let camera, scene, renderer;
+        init();
+        render();
+        function init() {
+            const container = document.getElementById('container');
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.05, 10);
+            camera.position.set(0.18, -0.1, 0.8);
+
+
+            scene = new THREE.Scene();
+            // 创建光源
+            const light1 = new THREE.PointLight(0xffffff, 1, 10);
+            light1.position.set(0, 1, 1);
+            light1.castShadow = true; // 启用阴影
+            scene.add(light1);
+            const light2 = new THREE.PointLight(0xffffff, 1, 5);
+            light2.position.set(0, 1, -1);
+            light2.castShadow = true; // 启用阴影
+            scene.add(light2);
+            // 设置场景
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setClearColor(0xffffff);
+            container.appendChild(renderer.domElement);
+            // 创建地板
+            const floorGeometry = new THREE.PlaneGeometry(100, 100);
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeeee }); // 地板颜色
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2; // 使地板水平放置
+            floor.position.y = -0.5
+            floor.receiveShadow = true; // 启用阴影
+            scene.add(floor);
+            // 加载模型
+            const loader = new GLTFLoader().setPath('./model/');
+            loader.load('01.gltf', function (gltf) {
+                gltf.scene.scale.set(0.3, 0.3, 0.3);
+                gltf.scene.position.y = -0.5;
+                scene.add(gltf.scene);
+                render();
+            });
+            // 添加控制器
+            const controls = new OrbitControls(camera, renderer.domElement);
+            controls.addEventListener('change', render);
+            controls.minDistance = 0.1;
+            controls.maxDistance = 3;
+            controls.target.set(0, 0, 0);
+            controls.update();
+        }
+        function render() {
+            renderer.render(scene, camera);
+        }
+        window.addEventListener('resize', onWindowResize, false);
+        function onWindowResize() {
+            const container = document.getElementById('container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            render();
+        }
+
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+
+</body>
+
+</html>
